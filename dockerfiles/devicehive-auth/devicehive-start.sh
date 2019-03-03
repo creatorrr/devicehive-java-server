@@ -81,6 +81,13 @@ then
     KAFKA_PARAMETERS="-Dbootstrap.servers=${DH_KAFKA_BOOTSTRAP_SERVERS} -Dzookeeper.connect=${DH_ZK_ADDRESS}:${DH_ZK_PORT:-2181} -Dzookeeper.connectionTimeout=${DH_ZK_CONNECTIONTIMEOUT:-8000} -Dzookeeper.sessionTimeout=${DH_ZK_SESSIONTIMEOUT:-10000}"
 fi
 
+SSL_SETTINGS=""
+if [ "$DH_POSTGRES_ENABLE_SSL" = "true" ] \
+    || [ "$DH_POSTGRES_ENABLE_SSL" = "1" ]
+then
+    SSL_SETTINGS="?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
+fi
+
 echo "Starting DeviceHive auth"
 java -server -Xms128m -Xmx256m -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+DisableExplicitGC -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -jar \
 -Dcom.devicehive.log.level="${DH_LOG_LEVEL:-WARN}" \
@@ -90,7 +97,7 @@ java -server -Xms128m -Xmx256m -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+Disable
 -Droot.log.level="${ROOT_LOG_LEVEL:-WARN}" \
 -Dserver.context-path=/auth \
 -Dserver.port=8090 \
--Dspring.datasource.url="jdbc:postgresql://${DH_POSTGRES_ADDRESS}:${DH_POSTGRES_PORT:-5432}/${DH_POSTGRES_DB}" \
+-Dspring.datasource.url="jdbc:postgresql://${DH_POSTGRES_ADDRESS}:${DH_POSTGRES_PORT:-5432}/${DH_POSTGRES_DB}${SSL_SETTINGS}" \
 -Dspring.datasource.username="${DH_POSTGRES_USERNAME}" \
 -Dspring.datasource.password="${DH_POSTGRES_PASSWORD}" \
 -Dproxy.connect="${DH_WS_PROXY:-localhost:3000}" \

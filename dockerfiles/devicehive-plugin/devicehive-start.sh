@@ -63,6 +63,13 @@ while true; do
     sleep 3
 done
 
+SSL_SETTINGS=""
+if [ "$DH_POSTGRES_ENABLE_SSL" = "true" ] \
+    || [ "$DH_POSTGRES_ENABLE_SSL" = "1" ]
+then
+    SSL_SETTINGS="?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
+fi
+
 echo "Starting DeviceHive plugin"
 java -server -Xms128m -Xmx256m -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+DisableExplicitGC -XX:+HeapDumpOnOutOfMemoryError -XX:+ExitOnOutOfMemoryError -jar \
 -Dacks="${DH_ACKS:-1}" \
@@ -84,7 +91,7 @@ java -server -Xms128m -Xmx256m -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:+Disable
 -Dserver.context-path=/plugin \
 -Dserver.port=8110 \
 -Dauth.base.url="${DH_AUTH_URL}" \
--Dspring.datasource.url="jdbc:postgresql://${DH_POSTGRES_ADDRESS}:${DH_POSTGRES_PORT:-5432}/${DH_POSTGRES_DB}" \
+-Dspring.datasource.url="jdbc:postgresql://${DH_POSTGRES_ADDRESS}:${DH_POSTGRES_PORT:-5432}/${DH_POSTGRES_DB}${SSL_SETTINGS}" \
 -Dspring.datasource.username="${DH_POSTGRES_USERNAME}" \
 -Dspring.datasource.password="${DH_POSTGRES_PASSWORD}" \
 -Dzookeeper.connect="${DH_ZK_ADDRESS}:${DH_ZK_PORT:-2181}" \
